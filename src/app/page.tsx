@@ -35,7 +35,7 @@ export default function Home() {
 
   const handleMouseOver = (event: React.MouseEvent<HTMLHeadingElement>) => {
     const textElement = event.currentTarget;
-    const originalText = textElement.dataset.value || "";
+    const originalText = textElement.dataset.value ?? "";
 
     if (animationStatus.get(textElement)) return;
     animationStatus.set(textElement, true);
