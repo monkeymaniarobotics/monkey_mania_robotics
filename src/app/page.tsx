@@ -1,35 +1,107 @@
-import Link from "next/link";
+"use client";
 
-export default function HomePage() {
+import { useEffect, useRef } from "react";
+import { Space_Mono } from "next/font/google"; // Import from next/font/google
+
+// Load the font
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"], // Specify font weights
+  variable: "--font-space-mono", // Define a CSS variable
+});
+
+export default function Home() {
+  const blobRef = useRef<HTMLDivElement>(null);
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const animationStatus = new Map<HTMLElement, boolean>(); // Track animation state
+
+  useEffect(() => {
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!blobRef.current) return;
+      const { clientX, clientY } = event;
+
+      blobRef.current.animate(
+        {
+          left: `${clientX}px`,
+          top: `${clientY}px`,
+        },
+        { duration: 3000, fill: "forwards" },
+      );
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    return () => window.removeEventListener("pointermove", handlePointerMove);
+  }, []);
+
+  const handleMouseOver = (event: React.MouseEvent<HTMLHeadingElement>) => {
+    const textElement = event.currentTarget;
+    const originalText = textElement.dataset.value || "";
+
+    if (animationStatus.get(textElement)) return;
+    animationStatus.set(textElement, true);
+
+    let iteration = 0;
+
+    const interval = setInterval(() => {
+      textElement.innerText = originalText
+        .split("")
+        .map((letter, index) => {
+          if (index < iteration) {
+            return originalText[index];
+          }
+          return letters[Math.floor(Math.random() * 26)];
+        })
+        .join("");
+
+      if (iteration >= originalText.length) {
+        clearInterval(interval);
+        animationStatus.set(textElement, false);
+      }
+
+      iteration += 1 / 3;
+    }, 30);
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-      <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-        <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-          Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
+    <main
+      className={`relative h-screen overflow-hidden bg-black ${spaceMono.variable}`}
+    >
+      {/* Animated Blob */}
+      <div
+        ref={blobRef}
+        className="absolute left-1/2 top-1/2 h-[34vmax] w-[34vmax] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-80"
+        style={{
+          background: "linear-gradient(to right, red, orange)",
+          animation: "blob-animation 20s infinite linear",
+        }}
+      ></div>
+
+      {/* Blur Effect */}
+      <div
+        className="absolute inset-0 z-10"
+        style={{ backdropFilter: "blur(12vmax)" }}
+      ></div>
+
+      {/* Title & Subtitle Wrapper */}
+      <div className="absolute left-1/2 top-1/2 z-20 max-w-[90vw] -translate-x-1/2 -translate-y-1/2 text-center text-white">
+        <h1
+          className="overflow-hidden whitespace-nowrap px-4 font-mono text-white"
+          style={{
+            fontSize: "clamp(2rem, 8vw, 6rem)",
+            textOverflow: "ellipsis",
+          }}
+          data-value="MONKEY MANIA ROBOTICS"
+          onMouseOver={handleMouseOver}
+        >
+          MONKEY MANIA ROBOTICS
         </h1>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-            href="https://create.t3.gg/en/usage/first-steps"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">First Steps →</h3>
-            <div className="text-lg">
-              Just the basics - Everything you need to know to set up your
-              database and authentication.
-            </div>
-          </Link>
-          <Link
-            className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 text-white hover:bg-white/20"
-            href="https://create.t3.gg/en/introduction"
-            target="_blank"
-          >
-            <h3 className="text-2xl font-bold">Documentation →</h3>
-            <div className="text-lg">
-              Learn more about Create T3 App, the libraries it uses, and how to
-              deploy it.
-            </div>
-          </Link>
+        <div className="space-y-4">
+          <h2 className="font-mono text-lg opacity-80 md:text-xl">
+            YEETUS | ORCAS | WRAITH | LOW TAPER FADE
+          </h2>
+          <p className="font-mono opacity-80">
+            Combat robotics team from metro Atlanta, GA
+          </p>
         </div>
       </div>
     </main>
